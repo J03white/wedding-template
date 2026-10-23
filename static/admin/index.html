@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Site Admin</title>
+  <script>
+    (function () {
+      var _open = window.open;
+      window.open = function (url, name, features) {
+        if (typeof url === 'string' && url.indexOf('/auth') !== -1) {
+          var origin = location.origin;
+          var provider = 'github';
+
+          fetch('/auth?direct=1')
+            .then(function (r) { return r.ok ? r.json() : Promise.reject(r.status); })
+            .then(function (data) {
+              window.dispatchEvent(new MessageEvent('message', {
+                data: 'authorizing:' + provider,
+                origin: origin
+              }));
+              window.dispatchEvent(new MessageEvent('message', {
+                data: 'authorization:' + provider + ':success:' + JSON.stringify({
+                  token: data.token,
+                  provider: provider
+                }),
+                origin: origin
+              }));
+            })
+            .catch(function (e) { console.error('[CMS] auth failed:', e); });
+
+          return { closed: false, close: function () {}, postMessage: function () {} };
+        }
+        return _open.apply(this, arguments);
+      };
+
+      function tryClick() {
+        var buttons = document.querySelectorAll('button');
+        for (var i = 0; i < buttons.length; i++) {
+          if (buttons[i].textContent.includes('Login with GitHub')) {
+            buttons[i].click();
+            return true;
+          }
+        }
+        return false;
+      }
+
+      if (!tryClick()) {
+        var observer = new MutationObserver(function () {
+          if (tryClick()) observer.disconnect();
+        });
+        observer.observe(document.documentElement, { childList: true, subtree: true });
+        setTimeout(function () { observer.disconnect(); }, 15000);
+      }
+    })();
+  </script>
+</head>
+<body>
+  <script src="https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js"></script>
+</body>
+</html>

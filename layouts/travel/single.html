@@ -1,0 +1,85 @@
+{{ define "main" }}
+
+<section class="page-hero">
+  <div class="container">
+    <span class="section-label" style="color: var(--color-accent);">Travel Guide</span>
+    <h1>{{ .Title }}</h1>
+    {{ with .Description }}<p>{{ . }}</p>{{ end }}
+  </div>
+</section>
+
+<section class="section">
+  <div class="section__inner">
+
+    {{ if .Params.airports }}
+    <div class="section__header">
+      <span class="section-label">From the UK</span>
+      <h2>Departure Airports</h2>
+      <p>Suggested routes from major UK airports. Journey times are approximate and depend on layovers and connections available nearer the time.</p>
+    </div>
+
+    <div class="airport-grid">
+      {{ range .Params.airports }}
+      <div class="airport-card">
+        <div class="airport-card__code">{{ .code }}</div>
+        <div class="airport-card__name">{{ .name }}</div>
+        <div class="airport-card__route">
+          {{ range .route }}
+          <div class="route-step">
+            <span class="route-step__dot" aria-hidden="true"></span>
+            <span>{{ . }}</span>
+          </div>
+          {{ end }}
+        </div>
+        <div class="airport-card__time">
+          Estimated journey: <strong>{{ .totalTime }}</strong>
+          {{ with .tip }}<span class="airport-card__tip">{{ . }}</span>{{ end }}
+        </div>
+      </div>
+      {{ end }}
+    </div>
+    {{ end }}
+
+    {{ with .Params.venueName }}
+    <div class="section__header">
+      <span class="section-label">The Venue</span>
+      <h2>{{ . }}</h2>
+      {{ with $.Params.venueAddress }}<p>{{ . }}</p>{{ end }}
+    </div>
+
+    {{ with $.Params.mapQuery }}
+    <div class="map-container">
+      <iframe
+        src="https://maps.google.com/maps?q={{ . }}&z=14&output=embed"
+        loading="lazy"
+        referrerpolicy="no-referrer-when-downgrade"
+        title="{{ $.Params.mapTitle | default (printf "Map showing %s" $.Params.venueName) }}"
+        allowfullscreen>
+      </iframe>
+    </div>
+    {{ end }}
+    {{ end }}
+
+    {{ with .Params.directions }}
+    <div class="section__header" style="margin-top: 3rem;">
+      {{ with $.Params.directionsLabel }}<span class="section-label">{{ . }}</span>{{ end }}
+      <h2>Driving Directions</h2>
+    </div>
+
+    <div class="driving-directions">
+      {{ range . }}
+      <div class="direction-card">
+        <h3>{{ .title }}</h3>
+        <ol class="direction-steps">
+          {{ range .steps }}<li>{{ . }}</li>{{ end }}
+        </ol>
+        <p class="direction-meta">{{ .meta }}</p>
+      </div>
+      {{ end }}
+    </div>
+    {{ end }}
+
+  </div>
+</section>
+
+{{ end }}

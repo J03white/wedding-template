@@ -1,0 +1,31 @@
+baseURL = 'https://PLACEHOLDER_SITE_DOMAIN/'
+languageCode = 'en-gb'
+title = 'PLACEHOLDER_COUPLE_NAMES'
+
+[params]
+  # coupleName, weddingDate, weddingDateFull, venue, location now live in
+  # data/settings.yaml (CMS: "Site Details") so the couple can edit them
+  # without a dev touching hugo.toml.
+  formspreeEndpoint   = "https://formspree.io/f/PLACEHOLDER_FORMSPREE_ID"
+  turnstileSiteKey    = "PLACEHOLDER_TURNSTILE_KEY"
+  maxAdditionalGuests = 8
+
+[[menus.main]]
+  name   = "Travel"
+  url    = "/travel/"
+  weight = 2
+
+[[menus.main]]
+  name   = "Accommodation"
+  url    = "/accommodation/"
+  weight = 3
+
+[[menus.main]]
+  name   = "FAQ"
+  url    = "/faq/"
+  weight = 4
+
+[[menus.main]]
+  name   = "RSVP"
+  url    = "/rsvp/"
+  weight = 5

@@ -1,0 +1,33 @@
+{{ define "main" }}
+
+<section class="page-hero">
+  <div class="container">
+    <span class="section-label" style="color: var(--color-accent);">Everything You Need to Know</span>
+    <h1>{{ .Title }}</h1>
+    {{ with .Description }}<p>{{ . }}</p>{{ end }}
+  </div>
+</section>
+
+<section class="section">
+  <div class="section__inner">
+    <div class="faq-list" id="faq-list" role="list">
+      {{ range .Params.faqs }}
+      <div class="faq-item" role="listitem">
+        <button class="faq-question" aria-expanded="false">
+          <span>{{ .q }}</span>
+          <span class="faq-icon" aria-hidden="true">+</span>
+        </button>
+        <div class="faq-answer" style="max-height: 0;">
+          <div class="faq-answer__inner">{{ .a }}</div>
+        </div>
+      </div>
+      {{ end }}
+    </div>
+
+    <div style="margin-top: 3rem; text-align: center;">
+      <p style="color: var(--color-text-muted);">Still have a question? Get in touch — we're happy to help.</p>
+    </div>
+  </div>
+</section>
+
+{{ end }}

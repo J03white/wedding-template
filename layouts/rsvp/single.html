@@ -1,0 +1,181 @@
+{{ define "main" }}
+
+{{ $siteKey := .Site.Params.turnstileSiteKey | default "" }}
+{{ $maxGuests := .Site.Params.maxAdditionalGuests | default 8 }}
+
+<section class="page-hero">
+  <div class="container">
+    <span class="section-label" style="color: var(--color-accent);">We'd Love to See You</span>
+    <h1>{{ .Title }}</h1>
+    <p>Please respond by <strong style="color: var(--color-accent);">{{ .Params.rsvpDeadline }}</strong></p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="section__inner">
+    <div class="rsvp-wrap">
+      <form class="rsvp-form"
+            id="rsvp-form"
+            action="{{ .Params.formspreeEndpoint | default .Site.Params.formspreeEndpoint }}"
+            method="POST"
+            data-max-guests="{{ $maxGuests }}">
+
+        {{/* Formspree spam honeypot */}}
+        <input type="text" name="_gotcha" style="display:none" tabindex="-1" autocomplete="off">
+        <input type="hidden" name="_subject" value="Wedding RSVP — {{ hugo.Data.settings.coupleName }}">
+
+        {{/* ── Section 1: Your details ─────────────────────── */}}
+        <div class="rsvp-section">
+          <h2 class="rsvp-section__title">Your details</h2>
+
+          <div class="form-group">
+            <label class="form-label" for="name">Full name</label>
+            <input class="form-input" type="text" id="name" name="name"
+                   required autocomplete="name" placeholder="Your full name">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="email">Email address</label>
+            <input class="form-input" type="email" id="email" name="email"
+                   required autocomplete="email" placeholder="your@email.com">
+          </div>
+
+          <div class="form-group">
+            <fieldset style="border: none; padding: 0;">
+              <legend class="form-label">Will you be attending?</legend>
+              <div class="form-radio-group">
+                <label class="form-radio">
+                  <input type="radio" name="attending" value="yes" id="attending-yes" required>
+                  <span>Yes, I'll be there!</span>
+                </label>
+                <label class="form-radio">
+                  <input type="radio" name="attending" value="no" id="attending-no">
+                  <span>Sorry, I can't make it</span>
+                </label>
+              </div>
+            </fieldset>
+          </div>
+        </div>
+
+        {{/* ── Section 2: Attendance details (shown when attending=yes) ── */}}
+        <div id="attending-fields" hidden>
+          <div class="rsvp-section rsvp-section--alt">
+            <h2 class="rsvp-section__title">
+              Your dietary requirements
+              <span class="optional">(optional)</span>
+            </h2>
+            <div class="form-group" style="margin-bottom: 0;">
+              <label class="form-label" for="dietary">Any dietary requirements or food allergies?</label>
+              <input class="form-input" type="text" id="dietary" name="dietary"
+                     placeholder="None / vegetarian / vegan / gluten-free / nut allergy…">
+            </div>
+          </div>
+
+          {{/* ── Additional guests ──────────────────────────── */}}
+          <div class="rsvp-section">
+            <div class="rsvp-section__header-row">
+              <h2 class="rsvp-section__title">Additional guests</h2>
+              <span class="guest-count" id="guest-count"></span>
+            </div>
+            <p class="rsvp-section__hint">
+              Adding a plus-one or RSVPing for your family? Use the button below to add each guest.
+            </p>
+
+            <div id="extra-guests" aria-live="polite"></div>
+
+            <button type="button"
+                    class="btn btn--add-guest"
+                    id="add-guest-btn"
+                    hidden>
+              + Add a guest
+            </button>
+          </div>
+
+          {{/* ── Accommodation ──────────────────────────────── */}}
+          <div class="rsvp-section rsvp-section--alt">
+            <h2 class="rsvp-section__title">Accommodation</h2>
+            <p class="rsvp-section__hint">
+              All rooms are on-site at Castello di Rosciano with breakfast included.
+              Single rooms from €80/night, double rooms from €120/night — all subject to 10% Italian VAT.
+            </p>
+
+            <div class="form-group">
+              <fieldset style="border: none; padding: 0;">
+                <legend class="form-label">Will you be staying at the venue?</legend>
+                <div class="form-radio-group">
+                  <label class="form-radio">
+                    <input type="radio" name="accommodation" value="yes" id="accommodation-yes">
+                    <span>Yes, I'd like to book a room</span>
+                  </label>
+                  <label class="form-radio">
+                    <input type="radio" name="accommodation" value="no" id="accommodation-no">
+                    <span>No, I'll arrange my own accommodation</span>
+                  </label>
+                </div>
+              </fieldset>
+            </div>
+
+            <div id="accommodation-fields" hidden>
+              <div class="form-row form-row--2col">
+                <div class="form-group">
+                  <label class="form-label">Rooms required</label>
+                  <input type="hidden" name="rooms" id="rooms_value">
+                  <div class="form-input form-input--readonly" id="rooms_display" aria-live="polite">—</div>
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="nights">Number of nights</label>
+                  <input class="form-input" type="number" id="nights" name="nights"
+                         min="1" max="7" placeholder="1">
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {{/* ── Section 3: Privacy consent ───────────────────── */}}
+        <div class="rsvp-section gdpr-section">
+          <label class="gdpr-label">
+            <input type="checkbox" name="gdpr_consent" id="gdpr-consent" required
+                   class="gdpr-checkbox">
+            <span class="gdpr-text">
+              I'm happy for <strong>{{ hugo.Data.settings.coupleName }}</strong> to store my name,
+              email address, and dietary information for the sole purpose of organising
+              their wedding. This information will not be shared with third parties and
+              will be deleted after the event.
+            </span>
+          </label>
+        </div>
+
+        {{/* ── CAPTCHA ──────────────────────────────────────── */}}
+        {{ if and $siteKey (ne $siteKey "REPLACE_WITH_YOUR_TURNSTILE_SITE_KEY") }}
+        <div class="form-group turnstile-wrapper">
+          <div class="cf-turnstile"
+               data-sitekey="{{ $siteKey }}"
+               data-theme="light"
+               data-size="normal"
+               data-callback="onTurnstileSuccess"
+               data-expired-callback="onTurnstileExpired">
+          </div>
+        </div>
+        {{ else }}
+        <div class="captcha-placeholder">
+          <p>
+            ⚙️ <strong>Turnstile CAPTCHA not yet configured.</strong>
+            Sign up at <a href="https://dash.cloudflare.com" target="_blank" rel="noopener">dash.cloudflare.com</a>
+            → Turnstile → Add site, then paste your site key into <code>hugo.toml</code> →
+            <code>params.turnstileSiteKey</code>.
+          </p>
+        </div>
+        {{ end }}
+
+        <div class="form-group">
+          <button type="submit" class="btn btn--full" id="submit-btn" disabled>Send RSVP</button>
+        </div>
+
+      </form>
+    </div>
+  </div>
+</section>
+
+
+{{ end }}

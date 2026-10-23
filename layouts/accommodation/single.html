@@ -1,0 +1,70 @@
+{{ define "main" }}
+
+<section class="page-hero">
+  <div class="container">
+    <span class="section-label" style="color: var(--color-accent);">Where to Stay</span>
+    <h1>{{ .Title }}</h1>
+    {{ with .Description }}<p>{{ . }}</p>{{ end }}
+  </div>
+</section>
+
+<section class="section">
+  <div class="section__inner">
+
+    <div class="room-grid">
+      {{ range .Params.rooms }}
+      <article class="room-card">
+        <div class="room-card__icon">{{ .icon }}</div>
+        <h2 class="room-card__type">{{ .type }}</h2>
+        {{ with .occupancy }}<p class="room-card__occupancy">{{ . }}</p>{{ end }}
+        <p class="room-card__desc">{{ .description }}</p>
+        <ul class="room-card__features">
+          {{ range .features }}
+          <li>{{ . }}</li>
+          {{ end }}
+        </ul>
+        {{ if or .price_per_night .price_note }}
+        <div class="room-card__price">
+          {{ with .price_per_night }}<span class="room-card__price-amount">{{ . }}</span>{{ end }}
+          {{ with .price_note }}<span class="room-card__price-note">{{ . }}</span>{{ end }}
+        </div>
+        {{ end }}
+      </article>
+      {{ end }}
+    </div>
+
+    {{ with .Params.extras }}
+    <div class="accommodation-extras">
+      <span class="section-label">Additional Guests</span>
+      <table class="extras-table">
+        <thead>
+          <tr>
+            <th></th>
+            <th>Price</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {{ range . }}
+          <tr>
+            <td>{{ .label }}</td>
+            <td>{{ .price }}</td>
+            <td class="extras-note">{{ .note }}</td>
+          </tr>
+          {{ end }}
+        </tbody>
+      </table>
+    </div>
+    {{ end }}
+
+    <div class="accommodation-note">
+      <span class="section-label">Booking & Payment</span>
+      {{ with .Params.payment_note }}<p>{{ . }}</p>{{ end }}
+      {{ with .Params.vat_note }}<p class="vat-note">{{ . }}</p>{{ end }}
+      <p>{{ .Params.closing_note | default "Room bookings are managed through us — please indicate your preference when you RSVP and we'll be in touch with availability and details." }}</p>
+    </div>
+
+  </div>
+</section>
+
+{{ end }}

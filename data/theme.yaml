@@ -1,0 +1,8 @@
+# Optional colour overrides, editable via the CMS ("Site Theme").
+# Leave a value blank to keep the default defined in assets/css/variables.css.
+color_primary: ""
+color_primary_light: ""
+color_primary_dark: ""
+color_secondary: ""
+color_accent: ""
+color_background: ""

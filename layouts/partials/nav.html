@@ -1,0 +1,22 @@
+<nav class="nav" id="main-nav" aria-label="Main navigation">
+  <div class="nav__inner">
+    <a href="{{ "/" | relURL }}" class="nav__logo">{{ hugo.Data.settings.coupleName }}</a>
+
+    <button class="nav__toggle" id="nav-toggle" aria-expanded="false" aria-controls="nav-links" aria-label="Toggle navigation">
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
+
+    <ul class="nav__links" id="nav-links" role="list">
+      {{ range .Site.Menus.main }}
+      {{ $isActive := or ($.IsMenuCurrent "main" .) ($.HasMenuCurrent "main" .) }}
+      <li>
+        <a href="{{ .URL | relLangURL }}"
+           class="nav__link{{ if $isActive }} nav__link--active{{ end }}{{ if eq .Name "RSVP" }} nav__link--rsvp{{ end }}"
+           {{ if $isActive }}aria-current="page"{{ end }}>{{ .Name }}</a>
+      </li>
+      {{ end }}
+    </ul>
+  </div>
+</nav>

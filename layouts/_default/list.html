@@ -1,0 +1,14 @@
+{{ define "main" }}
+<section class="page-hero">
+  <div class="container">
+    <h1>{{ .Title }}</h1>
+  </div>
+</section>
+<section class="section">
+  <div class="section__inner">
+    {{ range .Pages }}
+    <a href="{{ .Permalink }}">{{ .Title }}</a>
+    {{ end }}
+  </div>
+</section>
+{{ end }}

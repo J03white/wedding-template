@@ -1,0 +1,159 @@
+{{ define "main" }}
+
+{{/* ── Hero ────────────────────────────────────────────────── */}}
+<section class="hero" id="home">
+  <div class="hero__bg" aria-hidden="true">
+    {{/* Use heroImage param if set, otherwise fall back to assets/images/hero/* */}}
+    {{ $heroRes := "" }}
+    {{ with .Params.heroImage }}
+      {{ $heroRes = resources.Get . }}
+    {{ end }}
+    {{ if not $heroRes }}
+      {{ range first 1 (resources.Match "images/hero/*") }}
+        {{ if reflect.IsImageResource . }}{{ $heroRes = . }}{{ end }}
+      {{ end }}
+    {{ end }}
+    {{ with $heroRes }}
+      {{ if reflect.IsImageResource . }}
+        {{ $img := .Resize "1920x webp q85" }}
+        <img src="{{ $img.RelPermalink }}" alt="" loading="eager" fetchpriority="high">
+      {{ end }}
+    {{ end }}
+    <div class="hero__overlay"></div>
+  </div>
+  <div class="hero__content">
+    <span class="section-label" style="color: rgba(201,169,110,0.9);">{{ hugo.Data.settings.weddingDateFull }}</span>
+    <h1 class="hero__names">{{ hugo.Data.settings.coupleName }}</h1>
+    <div class="hero__divider" aria-hidden="true"></div>
+    <p class="hero__date">{{ hugo.Data.settings.venue }}</p>
+    <p class="hero__location">{{ hugo.Data.settings.location }}</p>
+  </div>
+  <div class="hero__scroll" aria-hidden="true">Scroll</div>
+</section>
+
+{{/* ── Welcome ──────────────────────────────────────────────── */}}
+<section class="section" id="welcome">
+  <div class="section__inner">
+    <div class="welcome">
+      <span class="section-label">Welcome</span>
+      <div class="welcome__text" style="margin-top: 1.5rem;">
+        {{ .Content }}
+      </div>
+      <div class="welcome__signature">{{ hugo.Data.settings.coupleName }}</div>
+    </div>
+  </div>
+</section>
+
+{{/* ── Venue video ──────────────────────────────────────────── */}}
+{{ with .Params.venueVideo }}
+{{ $venuePhoto := resources.Get ($.Params.heroImage | default "") }}
+<section class="section venue-video-section" id="venue">
+  <div class="section__inner">
+    <div class="section__header">
+      <span class="section-label">The Venue</span>
+      <h2>Castello di Rosciano</h2>
+      <p>Set in the rolling hills of Umbria, our venue in Torgiano is a dream come true.</p>
+    </div>
+    <div class="venue-video-wrap">
+      <video class="venue-video"
+             controls
+             preload="metadata"
+             {{ if and $venuePhoto (reflect.IsImageResource $venuePhoto) }}
+             {{ $poster := $venuePhoto.Resize "1280x webp q80" }}
+             poster="{{ $poster.RelPermalink }}"
+             {{ end }}>
+        <source src="{{ . | absURL }}" type="video/mp4">
+        Your browser does not support video playback.
+      </video>
+    </div>
+  </div>
+</section>
+{{ end }}
+
+{{/* ── Photo carousel ───────────────────────────────────────── */}}
+{{ $photos := slice }}
+{{ with hugo.Data.gallery }}{{ $photos = .photos }}{{ end }}
+<section class="section section--alt section--flush" id="gallery" aria-label="Photo gallery">
+  {{ if $photos }}
+    <div class="photo-carousel" id="photo-gallery">
+      <div class="photo-carousel__track" id="carousel-track">
+        {{ range $photos }}
+          {{ $img := resources.Get .src }}
+          {{ if and $img (reflect.IsImageResource $img) }}
+            {{ $thumb := $img.Resize "800x webp q85" }}
+            {{ $full  := $img.Resize "1600x webp q90" }}
+            <div class="photo-carousel__slide"
+                 data-src="{{ $full.RelPermalink }}"
+                 tabindex="0"
+                 role="button"
+                 aria-label="View photo">
+              <img src="{{ $thumb.RelPermalink }}" alt="{{ hugo.Data.settings.coupleName }}" loading="lazy">
+            </div>
+          {{ end }}
+        {{ end }}
+      </div>
+      <button class="photo-carousel__btn photo-carousel__btn--prev" id="carousel-prev" aria-label="Previous photos">&#8249;</button>
+      <button class="photo-carousel__btn photo-carousel__btn--next" id="carousel-next" aria-label="Next photos">&#8250;</button>
+    </div>
+  {{ else }}
+    <div style="padding: 3rem 2rem; text-align: center; background: var(--color-surface);">
+      <p style="color: var(--color-text-muted); font-size: 0.875rem;">
+        Add couple photos via the admin panel and they will appear here.
+      </p>
+    </div>
+  {{ end }}
+</section>
+
+{{/* ── Ceremony & Reception ─────────────────────────────────── */}}
+<section class="section" id="details">
+  <div class="section__inner">
+    <div class="section__header">
+      <span class="section-label">The Day</span>
+      <h2>What to Expect</h2>
+    </div>
+    <div class="details-grid">
+      {{ range .Params.details }}
+      {{ $cardTitle := .title }}
+      <div class="detail-card">
+        {{ with .image }}
+        {{ $img := resources.Get . }}
+        {{ if $img }}
+        {{ $banner := $img.Fill "800x400 Center webp q80" }}
+        <img class="detail-card__banner" src="{{ $banner.RelPermalink }}" alt="{{ $cardTitle }}">
+        {{ end }}
+        {{ end }}
+        <div class="detail-card__body">
+          <h3>{{ .title }}</h3>
+          {{ range .items }}
+          <div class="detail-card__item">
+            <span class="detail-card__label">{{ .label }}</span>
+            <span>{{ .value }}</span>
+          </div>
+          {{ end }}
+          {{ with .note }}<p class="detail-card__note">{{ . }}</p>{{ end }}
+        </div>
+      </div>
+      {{ end }}
+    </div>
+  </div>
+</section>
+
+{{/* ── Getting Here teaser ──────────────────────────────────── */}}
+<section class="travel-teaser">
+  <div class="container">
+    <span class="section-label" style="color: var(--color-accent);">{{ .Params.travelTeaserLabel | default "Getting Here" }}</span>
+    <h2>{{ .Params.travelTeaserHeading | default "Getting Here" }}</h2>
+    {{ with .Params.travelTeaserText }}<p>{{ . }}</p>{{ end }}
+    <a href="{{ "/travel/" | relURL }}" class="btn btn--outline">View Travel Guide</a>
+  </div>
+</section>
+
+{{/* ── Lightbox ─────────────────────────────────────────────── */}}
+<div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Photo viewer">
+  <button class="lightbox__close" id="lightbox-close" aria-label="Close photo viewer">&#10005;</button>
+  <button class="lightbox__prev"  id="lightbox-prev"  aria-label="Previous photo">&#8249;</button>
+  <img class="lightbox__img" id="lightbox-img" src="" alt="">
+  <button class="lightbox__next"  id="lightbox-next"  aria-label="Next photo">&#8250;</button>
+</div>
+
+{{ end }}
