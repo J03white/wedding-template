@@ -235,3 +235,19 @@ collections:
             fields:
               - { label: Question, name: q, widget: string }
               - { label: Answer, name: a, widget: text }
+
+  # ── RSVP Thank You Page ─────────────────────────────────────────────────────
+  # Shown after a guest submits the RSVP form (Formspree redirects here).
+  - name: rsvp-thank-you
+    label: RSVP Thank You Page
+    files:
+      - name: rsvp-thank-you
+        label: RSVP Thank You Page
+        file: content/rsvp-thank-you.md
+        fields:
+          - { label: Page Title, name: title, widget: string }
+          - { label: Intro Text, name: description, widget: text, required: false }
+          - label: Message
+            name: body
+            widget: markdown
+            hint: "Shown above the couple's contact note, which is added automatically."

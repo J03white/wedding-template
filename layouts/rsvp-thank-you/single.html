@@ -1,0 +1,19 @@
+{{ define "main" }}
+
+<section class="page-hero">
+  <div class="container">
+    <span class="section-label" style="color: var(--color-accent);">RSVP Received</span>
+    <h1>{{ .Title }}</h1>
+    {{ with .Description }}<p>{{ . }}</p>{{ end }}
+  </div>
+</section>
+
+<section class="section">
+  <div class="section__inner" style="max-width: 600px; margin: 0 auto; text-align: center;">
+    <div class="welcome__text">{{ .Content }}</div>
+    <p>Please contact <strong>{{ hugo.Data.settings.coupleName }}</strong> if you need to update any information.</p>
+    <a href="{{ "/" | relURL }}" class="btn btn--outline" style="margin-top: var(--space-xl);">Back to Home</a>
+  </div>
+</section>
+
+{{ end }}
