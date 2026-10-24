@@ -236,6 +236,27 @@ collections:
               - { label: Question, name: q, widget: string }
               - { label: Answer, name: a, widget: text }
 
+  # ── RSVP Settings ────────────────────────────────────────────────────────────
+  - name: rsvp
+    label: RSVP Settings
+    files:
+      - name: rsvp
+        label: RSVP Settings
+        file: content/rsvp.md
+        fields:
+          - { label: Page Title, name: title, widget: string }
+          - { label: "RSVP Deadline (e.g. 1st March 2028)", name: rsvpDeadline, widget: string }
+          - label: Does the venue offer on-site rooms to book?
+            name: onsiteAccommodation
+            widget: boolean
+            default: false
+            hint: "Turn on to show the room-booking question on the RSVP form. Leave off if guests need to arrange their own accommodation (e.g. nearby hotels) — the Accommodation page handles that instead."
+          - label: On-Site Accommodation Hint
+            name: accommodationHint
+            widget: text
+            required: false
+            hint: "Shown above the room-booking question, e.g. room prices and what's included. Only used when the toggle above is on."
+
   # ── RSVP Thank You Page ─────────────────────────────────────────────────────
   # Shown after a guest submits the RSVP form (Formspree redirects here).
   - name: rsvp-thank-you

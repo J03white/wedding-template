@@ -94,12 +94,11 @@
           </div>
 
           {{/* ── Accommodation ──────────────────────────────── */}}
+          {{/* Only shown when the venue itself offers on-site rooms to book. */}}
+          {{ if .Params.onsiteAccommodation }}
           <div class="rsvp-section rsvp-section--alt">
             <h2 class="rsvp-section__title">Accommodation</h2>
-            <p class="rsvp-section__hint">
-              All rooms are on-site at Castello di Rosciano with breakfast included.
-              Single rooms from €80/night, double rooms from €120/night — all subject to 10% Italian VAT.
-            </p>
+            {{ with .Params.accommodationHint }}<p class="rsvp-section__hint">{{ . }}</p>{{ end }}
 
             <div class="form-group">
               <fieldset style="border: none; padding: 0;">
@@ -132,6 +131,7 @@
               </div>
             </div>
           </div>
+          {{ end }}
         </div>
 
         {{/* ── Section 3: Privacy consent ───────────────────── */}}
