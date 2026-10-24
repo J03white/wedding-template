@@ -20,7 +20,6 @@ Placeholders used throughout the project:
 | `PLACEHOLDER_RSVP_DATE` | e.g. "1st April 2026" |
 | `PLACEHOLDER_SITE_DOMAIN` | e.g. "alice-ben-wedding.pages.dev" |
 | `OWNER/REPO` | e.g. "j03white/alice-ben-wedding" |
-| `PLACEHOLDER_FORMSPREE_ID` | Formstree form ID |
 | `PLACEHOLDER_TURNSTILE_KEY` | Cloudflare Turnstile site key |
 
 ---
@@ -129,7 +128,32 @@ This is what lets the couple log into `/admin` using just their email address �
 
 ---
 
-### 5 — Add images
+### 5 — Google Sheets RSVP backend
+
+RSVP submissions append to a Google Sheet via a Cloudflare Pages Function (`functions/rsvp.js`), not Formspree.
+
+**Google Cloud (one-off per account, can be reused across multiple sites):**
+1. Create (or reuse) a Google Cloud project → enable the **Google Sheets API**
+2. **IAM & Admin → Service Accounts → Create Service Account** (e.g. `rsvp-writer`)
+3. Open it → **Keys → Add Key → Create new key → JSON** — download it, never commit it
+4. Note the `client_email` and `private_key` fields from that JSON
+
+**Per client:**
+1. Create two Google Sheets (production + dev), each with a tab named `RSVPs`
+2. Header row — match whichever columns this site's RSVP form actually sends:
+   `submission_id | submitted_at | guest_name | guest_email | is_primary_guest | attending | dietary | party_size`
+   — plus `accommodation | rooms | nights` on the end **only if** this site's RSVP page has `onsiteAccommodation: true`
+3. **Share** each sheet with the service account's `client_email`, set to **Editor**
+4. Grab each sheet's ID from its URL (`.../spreadsheets/d/<ID>/edit`)
+5. In **Cloudflare Pages → [project] → Settings → Environment Variables**:
+   - Production: `GOOGLE_SHEET_ID` = the production sheet's ID
+   - Preview: `GOOGLE_SHEET_ID` = the dev sheet's ID
+   - Both environments: `GOOGLE_SERVICE_ACCOUNT_EMAIL`, `GOOGLE_PRIVATE_KEY` (encrypted), and `TURNSTILE_SECRET_KEY` (optional — server-side Turnstile verification is skipped if unset)
+6. Redeploy so the new env vars take effect
+
+---
+
+### 6 — Add images
 
 Commit the following images to the repository:
 
@@ -143,7 +167,7 @@ Any photos added to `assets/images/couple/` will appear in the homepage photo ca
 
 ---
 
-### 6 — Final check
+### 7 — Final check
 
 1. Visit `https://<SITE_DOMAIN>/admin`
 2. Cloudflare Access prompts for email → enter one of the authorised addresses

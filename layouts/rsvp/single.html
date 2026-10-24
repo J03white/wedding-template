@@ -16,15 +16,13 @@
     <div class="rsvp-wrap">
       <form class="rsvp-form"
             id="rsvp-form"
-            action="{{ .Params.formspreeEndpoint | default .Site.Params.formspreeEndpoint }}"
+            action="/rsvp"
             method="POST"
-            data-max-guests="{{ $maxGuests }}">
+            data-max-guests="{{ $maxGuests }}"
+            data-thank-you-url="{{ "rsvp/thank-you/" | absURL }}">
 
-        {{/* Formspree spam honeypot */}}
-        <input type="text" name="_gotcha" style="display:none" tabindex="-1" autocomplete="off">
-        <input type="hidden" name="_subject" value="Wedding RSVP — {{ hugo.Data.settings.coupleName }}">
-        {{/* Formspree redirects here after a successful submission */}}
-        <input type="hidden" name="_next" value="{{ "rsvp/thank-you/" | absURL }}">
+        {{/* Honeypot — invisible to guests, bots fill every field blindly */}}
+        <input type="text" name="website" style="display:none" tabindex="-1" autocomplete="off">
 
         {{/* ── Section 1: Your details ─────────────────────── */}}
         <div class="rsvp-section">
@@ -169,6 +167,10 @@
           </p>
         </div>
         {{ end }}
+
+        <p class="form-error" id="rsvp-error" hidden>
+          Something went wrong submitting your RSVP — please try again, or email us directly.
+        </p>
 
         <div class="form-group">
           <button type="submit" class="btn btn--full" id="submit-btn" disabled>Send RSVP</button>

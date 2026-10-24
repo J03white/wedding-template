@@ -258,7 +258,7 @@ collections:
             hint: "Shown above the room-booking question, e.g. room prices and what's included. Only used when the toggle above is on."
 
   # ── RSVP Thank You Page ─────────────────────────────────────────────────────
-  # Shown after a guest submits the RSVP form (Formspree redirects here).
+  # Shown after a guest submits the RSVP form (rsvp.js redirects here on success).
   - name: rsvp-thank-you
     label: RSVP Thank You Page
     files:

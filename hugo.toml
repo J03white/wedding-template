@@ -6,7 +6,9 @@ title = 'PLACEHOLDER_COUPLE_NAMES'
   # coupleName, weddingDate, weddingDateFull, venue, location now live in
   # data/settings.yaml (CMS: "Site Details") so the couple can edit them
   # without a dev touching hugo.toml.
-  formspreeEndpoint   = "https://formspree.io/f/PLACEHOLDER_FORMSPREE_ID"
+  # RSVP submissions post to the same "/rsvp" Pages Function in every
+  # environment — Cloudflare Pages selects the right Google Sheet via its
+  # Production/Preview environment variables, not via Hugo config.
   turnstileSiteKey    = "PLACEHOLDER_TURNSTILE_KEY"
   maxAdditionalGuests = 8
 

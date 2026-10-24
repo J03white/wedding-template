@@ -9,6 +9,7 @@
   var addGuestBtn     = document.getElementById('add-guest-btn');
   var guestCount      = document.getElementById('guest-count');
   var submitBtn       = document.getElementById('submit-btn');
+  var errorMsg        = document.getElementById('rsvp-error');
   var MAX_GUESTS      = parseInt(form.dataset.maxGuests || '8', 10);
 
   var accommodationYes    = document.getElementById('accommodation-yes');
@@ -178,6 +179,29 @@
 
   if (addGuestBtn) {
     addGuestBtn.addEventListener('click', addGuestRow);
+  }
+
+  // ── Submit via fetch, redirect to thank-you page on success ──
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+    if (submitBtn) submitBtn.disabled = true;
+    if (errorMsg) errorMsg.hidden = true;
+
+    fetch(form.action, { method: 'POST', body: new FormData(form) })
+      .then(function (res) { return res.json().then(function (body) { return { ok: res.ok, body: body }; }); })
+      .then(function (result) {
+        if (result.ok && result.body && result.body.ok) {
+          window.location.href = form.dataset.thankYouUrl;
+        } else {
+          showSubmitError();
+        }
+      })
+      .catch(showSubmitError);
+  });
+
+  function showSubmitError() {
+    if (submitBtn) submitBtn.disabled = false;
+    if (errorMsg) errorMsg.hidden = false;
   }
 
   // ── Initialise hidden state on page load ──────────────────
