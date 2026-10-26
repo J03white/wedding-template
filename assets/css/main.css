@@ -679,6 +679,7 @@ p { line-height: 1.7; }
 }
 .btn--outline:hover { background: rgba(255,255,255,0.1); color: var(--color-white); }
 .btn:disabled { background: var(--color-surface-2); color: var(--color-text-muted); cursor: not-allowed; }
+.btn--pending { background: var(--color-surface-2); color: var(--color-text-muted); }
 
 /* ── Accommodation ───────────────────────────────────────── */
 .room-grid {

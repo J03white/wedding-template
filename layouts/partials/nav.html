@@ -1,6 +1,6 @@
 <nav class="nav" id="main-nav" aria-label="Main navigation">
   <div class="nav__inner">
-    <a href="{{ "/" | relURL }}" class="nav__logo">{{ hugo.Data.settings.coupleName }}</a>
+    <a href="{{ "/" | relURL }}" class="nav__logo">{{ .Site.Data.settings.coupleName }}</a>
 
     <button class="nav__toggle" id="nav-toggle" aria-expanded="false" aria-controls="nav-links" aria-label="Toggle navigation">
       <span></span>

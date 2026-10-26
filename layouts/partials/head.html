@@ -1,7 +1,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>{{ if .IsHome }}{{ .Site.Title }} — {{ hugo.Data.settings.weddingDateFull }}{{ else }}{{ .Title }} | {{ .Site.Title }}{{ end }}</title>
-<meta name="description" content="{{ if .IsHome }}Join us to celebrate the wedding of {{ hugo.Data.settings.coupleName }} on {{ hugo.Data.settings.weddingDateFull }} at {{ hugo.Data.settings.venue }}, {{ hugo.Data.settings.location }}.{{ else }}{{ with .Description }}{{ . }}{{ else }}{{ hugo.Data.settings.coupleName }} — {{ hugo.Data.settings.weddingDateFull }}{{ end }}{{ end }}">
+<title>{{ if .IsHome }}{{ .Site.Title }} — {{ .Site.Data.settings.weddingDateFull }}{{ else }}{{ .Title }} | {{ .Site.Title }}{{ end }}</title>
+<meta name="description" content="{{ if .IsHome }}Join us to celebrate the wedding of {{ .Site.Data.settings.coupleName }} on {{ .Site.Data.settings.weddingDateFull }} at {{ .Site.Data.settings.venue }}, {{ .Site.Data.settings.location }}.{{ else }}{{ with .Description }}{{ . }}{{ else }}{{ .Site.Data.settings.coupleName }} — {{ .Site.Data.settings.weddingDateFull }}{{ end }}{{ end }}">
 <meta name="robots" content="noindex, nofollow">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>

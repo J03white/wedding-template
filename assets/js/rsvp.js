@@ -22,9 +22,14 @@
   // Turnstile is optional — if widget isn't present, treat as already passed
   var turnstileReady = !document.querySelector('.cf-turnstile');
 
+  // Turnstile actually blocks the click (disabled); an incomplete form just
+  // *looks* blocked (btn--pending) but stays clickable, so clicking it runs
+  // the submit handler's native validation and highlights the missing field
+  // instead of a silent dead end.
   function updateSubmitState() {
     if (!submitBtn) return;
-    submitBtn.disabled = !(form.checkValidity() && turnstileReady);
+    submitBtn.disabled = !turnstileReady;
+    submitBtn.classList.toggle('btn--pending', !form.checkValidity());
   }
 
   window.onTurnstileSuccess = function () { turnstileReady = true;  updateSubmitState(); };
@@ -184,6 +189,10 @@
   // ── Submit via fetch, redirect to thank-you page on success ──
   form.addEventListener('submit', function (e) {
     e.preventDefault();
+    if (!form.checkValidity()) {
+      form.reportValidity();
+      return;
+    }
     if (submitBtn) submitBtn.disabled = true;
     if (errorMsg) errorMsg.hidden = true;
 

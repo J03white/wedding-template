@@ -11,7 +11,7 @@
 <section class="section">
   <div class="section__inner" style="max-width: 600px; margin: 0 auto; text-align: center;">
     <div class="welcome__text">{{ .Content }}</div>
-    <p>Please contact <strong>{{ hugo.Data.settings.coupleName }}</strong> if you need to update any information.</p>
+    <p>Please contact <strong>{{ .Site.Data.settings.coupleName }}</strong> if you need to update any information.</p>
     <a href="{{ "/" | relURL }}" class="btn btn--outline" style="margin-top: var(--space-xl);">Back to Home</a>
   </div>
 </section>

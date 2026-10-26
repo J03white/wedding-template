@@ -4,16 +4,16 @@
   so an untouched theme.yaml changes nothing.
 */}}
 :root {
-{{ with hugo.Data.theme.color_primary }}  --color-primary: {{ . }};
+{{ with .Site.Data.theme.color_primary }}  --color-primary: {{ . }};
 {{ end -}}
-{{ with hugo.Data.theme.color_primary_light }}  --color-primary-light: {{ . }};
+{{ with .Site.Data.theme.color_primary_light }}  --color-primary-light: {{ . }};
 {{ end -}}
-{{ with hugo.Data.theme.color_primary_dark }}  --color-primary-dark: {{ . }};
+{{ with .Site.Data.theme.color_primary_dark }}  --color-primary-dark: {{ . }};
 {{ end -}}
-{{ with hugo.Data.theme.color_secondary }}  --color-secondary: {{ . }};
+{{ with .Site.Data.theme.color_secondary }}  --color-secondary: {{ . }};
 {{ end -}}
-{{ with hugo.Data.theme.color_accent }}  --color-accent: {{ . }};
+{{ with .Site.Data.theme.color_accent }}  --color-accent: {{ . }};
 {{ end -}}
-{{ with hugo.Data.theme.color_background }}  --color-background: {{ . }};
+{{ with .Site.Data.theme.color_background }}  --color-background: {{ . }};
 {{ end -}}
 }

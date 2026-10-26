@@ -1,6 +1,6 @@
 <footer class="footer">
-  <div class="footer__names">{{ hugo.Data.settings.coupleName }}</div>
-  <div class="footer__date">{{ hugo.Data.settings.weddingDateFull }}</div>
-  <div class="footer__venue">{{ hugo.Data.settings.venue }} &middot; {{ hugo.Data.settings.location }}</div>
+  <div class="footer__names">{{ .Site.Data.settings.coupleName }}</div>
+  <div class="footer__date">{{ .Site.Data.settings.weddingDateFull }}</div>
+  <div class="footer__venue">{{ .Site.Data.settings.venue }} &middot; {{ .Site.Data.settings.location }}</div>
   <div class="footer__bottom">Made with love ♥</div>
 </footer>

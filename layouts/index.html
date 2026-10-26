@@ -10,11 +10,11 @@
     {{ end }}
     {{ if not $heroRes }}
       {{ range first 1 (resources.Match "images/hero/*") }}
-        {{ if reflect.IsImageResource . }}{{ $heroRes = . }}{{ end }}
+        {{ if eq .ResourceType "image" }}{{ $heroRes = . }}{{ end }}
       {{ end }}
     {{ end }}
     {{ with $heroRes }}
-      {{ if reflect.IsImageResource . }}
+      {{ if eq .ResourceType "image" }}
         {{ $img := .Resize "1920x webp q85" }}
         <img src="{{ $img.RelPermalink }}" alt="" loading="eager" fetchpriority="high">
       {{ end }}
@@ -22,11 +22,11 @@
     <div class="hero__overlay"></div>
   </div>
   <div class="hero__content">
-    <span class="section-label" style="color: rgba(201,169,110,0.9);">{{ hugo.Data.settings.weddingDateFull }}</span>
-    <h1 class="hero__names">{{ hugo.Data.settings.coupleName }}</h1>
+    <span class="section-label" style="color: rgba(201,169,110,0.9);">{{ .Site.Data.settings.weddingDateFull }}</span>
+    <h1 class="hero__names">{{ .Site.Data.settings.coupleName }}</h1>
     <div class="hero__divider" aria-hidden="true"></div>
-    <p class="hero__date">{{ hugo.Data.settings.venue }}</p>
-    <p class="hero__location">{{ hugo.Data.settings.location }}</p>
+    <p class="hero__date">{{ .Site.Data.settings.venue }}</p>
+    <p class="hero__location">{{ .Site.Data.settings.location }}</p>
   </div>
   <div class="hero__scroll" aria-hidden="true">Scroll</div>
 </section>
@@ -39,7 +39,7 @@
       <div class="welcome__text" style="margin-top: 1.5rem;">
         {{ .Content }}
       </div>
-      <div class="welcome__signature">{{ hugo.Data.settings.coupleName }}</div>
+      <div class="welcome__signature">{{ .Site.Data.settings.coupleName }}</div>
     </div>
   </div>
 </section>
@@ -58,7 +58,7 @@
       <video class="venue-video"
              controls
              preload="metadata"
-             {{ if and $venuePhoto (reflect.IsImageResource $venuePhoto) }}
+             {{ if and $venuePhoto (eq $venuePhoto.ResourceType "image") }}
              {{ $poster := $venuePhoto.Resize "1280x webp q80" }}
              poster="{{ $poster.RelPermalink }}"
              {{ end }}>
@@ -72,14 +72,14 @@
 
 {{/* ── Photo carousel ───────────────────────────────────────── */}}
 {{ $photos := slice }}
-{{ with hugo.Data.gallery }}{{ $photos = .photos }}{{ end }}
+{{ with .Site.Data.gallery }}{{ $photos = .photos }}{{ end }}
 <section class="section section--alt section--flush" id="gallery" aria-label="Photo gallery">
   {{ if $photos }}
     <div class="photo-carousel" id="photo-gallery">
       <div class="photo-carousel__track" id="carousel-track">
         {{ range $photos }}
           {{ $img := resources.Get .src }}
-          {{ if and $img (reflect.IsImageResource $img) }}
+          {{ if and $img (eq $img.ResourceType "image") }}
             {{ $thumb := $img.Resize "800x webp q85" }}
             {{ $full  := $img.Resize "1600x webp q90" }}
             <div class="photo-carousel__slide"
@@ -87,7 +87,7 @@
                  tabindex="0"
                  role="button"
                  aria-label="View photo">
-              <img src="{{ $thumb.RelPermalink }}" alt="{{ hugo.Data.settings.coupleName }}" loading="lazy">
+              <img src="{{ $thumb.RelPermalink }}" alt="{{ .Site.Data.settings.coupleName }}" loading="lazy">
             </div>
           {{ end }}
         {{ end }}
