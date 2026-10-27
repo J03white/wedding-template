@@ -147,7 +147,7 @@
         </div>
 
         {{/* ── CAPTCHA ──────────────────────────────────────── */}}
-        {{ if and $siteKey (ne $siteKey "REPLACE_WITH_YOUR_TURNSTILE_SITE_KEY") }}
+        {{ if and $siteKey (ne $siteKey "PLACEHOLDER_TURNSTILE_KEY") }}
         <div class="form-group turnstile-wrapper">
           <div class="cf-turnstile"
                data-sitekey="{{ $siteKey }}"
