@@ -22,14 +22,15 @@ export async function siteGate(request, env) {
   const url = new URL(request.url);
   if (EXEMPT_PREFIXES.some(p => url.pathname.startsWith(p))) return null;
 
-  const expected = await token(env.SITE_PASSWORD);
+  const sitePassword = env.SITE_PASSWORD.trim();
+  const expected = await token(sitePassword);
 
   if (request.method === 'POST' && url.pathname === '/site-password') {
     const data = await request.formData();
-    const submitted = (data.get('password') || '').toString();
+    const submitted = (data.get('password') || '').toString().trim();
     const redirect = (data.get('redirect') || '/').toString();
 
-    if (submitted === env.SITE_PASSWORD) {
+    if (submitted === sitePassword) {
       return new Response(null, {
         status: 303,
         headers: {
