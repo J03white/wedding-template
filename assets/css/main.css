@@ -340,7 +340,9 @@ p { line-height: 1.7; }
 }
 .travel-teaser h2 { color: var(--color-white); font-size: var(--text-3xl); margin-top: var(--space-sm); }
 .travel-teaser p { color: rgba(255,255,255,0.72); margin-top: var(--space-sm); max-width: 560px; margin-left: auto; margin-right: auto; }
-.travel-teaser .btn { margin-top: var(--space-lg); display: inline-block; padding: 0.75rem 2rem; font-size: var(--text-sm); }
+.travel-teaser .btn { margin-top: var(--space-lg); display: inline-block; padding: 0.7rem 1.75rem; font-size: var(--text-sm); letter-spacing: 0.08em; }
+.travel-teaser .btn--outline { border: 1.5px solid var(--color-accent); color: var(--color-accent); }
+.travel-teaser .btn--outline:hover { background: var(--color-accent); color: var(--color-primary-dark); }
 
 /* ── Photo carousel ──────────────────────────────────────── */
 .photo-carousel {
@@ -978,7 +980,7 @@ p { line-height: 1.7; }
   background: var(--color-primary-dark);
   color: rgba(255,255,255,0.65);
   text-align: center;
-  padding: var(--space-xl) var(--space-lg);
+  padding: var(--space-lg) var(--space-lg);
 }
 .footer__names { font-family: var(--font-serif); font-size: var(--text-2xl); color: var(--color-white); margin-bottom: var(--space-xs); }
 .footer__date  { font-size: var(--text-sm); letter-spacing: 0.1em; text-transform: uppercase; }
