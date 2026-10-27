@@ -19,12 +19,14 @@
 
 const COOKIE_NAME = 'site_auth';
 const EXEMPT_PREFIXES = ['/admin', '/auth'];
+const STATIC_ASSET_PATTERN = /\.(css|js|mjs|png|jpe?g|webp|gif|svg|ico|woff2?|ttf|otf|mp4|webm|pdf)$/i;
 
 export async function siteGate(request, env) {
   if (!env.SITE_PASSWORD) return null;
 
   const url = new URL(request.url);
   if (EXEMPT_PREFIXES.some(p => url.pathname.startsWith(p))) return null;
+  if (STATIC_ASSET_PATTERN.test(url.pathname)) return null;
 
   const sitePassword = env.SITE_PASSWORD.trim();
   const expected = await token(sitePassword);
