@@ -20,7 +20,11 @@
         <p class="room-card__desc">{{ .description }}</p>
         <ul class="room-card__features">
           {{ range .features }}
+          {{ if hasPrefix . "http" }}
+          <li><a href="{{ . }}" target="_blank" rel="noopener">Visit website</a></li>
+          {{ else }}
           <li>{{ . }}</li>
+          {{ end }}
           {{ end }}
         </ul>
         {{ if or .price_per_night .price_note }}
