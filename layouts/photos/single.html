@@ -1,0 +1,78 @@
+{{ define "main" }}
+
+{{ $siteKey := .Site.Params.turnstileSiteKey | default "" }}
+
+<section class="page-hero">
+  <div class="container">
+    <span class="section-label" style="color: var(--color-accent);">Guest Photos</span>
+    <h1>{{ .Title }}</h1>
+    {{ with .Description }}<p>{{ . }}</p>{{ end }}
+  </div>
+</section>
+
+<section class="section">
+  <div class="section__inner">
+    <div class="rsvp-wrap">
+      <form class="rsvp-form"
+            id="photo-upload-form"
+            action="/photo-upload"
+            method="POST"
+            enctype="multipart/form-data">
+
+        {{/* Honeypot — invisible to guests, bots fill every field blindly */}}
+        <input type="text" name="website" style="display:none" tabindex="-1" autocomplete="off">
+
+        <div class="form-group">
+          <label class="form-label" for="photo-name">Your name <span class="optional">(optional)</span></label>
+          <input class="form-input" type="text" id="photo-name" name="name" placeholder="So we know who to thank">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="photo-files">Photos</label>
+          <input class="form-input" type="file" id="photo-files" name="photos"
+                 accept="image/jpeg,image/png,image/heic,image/heif,image/webp,image/gif"
+                 multiple required>
+          <p class="rsvp-section__hint">Up to 10 photos per upload, 20MB each.</p>
+        </div>
+
+        <ul class="photo-upload__list" id="photo-upload-list" aria-live="polite"></ul>
+
+        {{/* ── CAPTCHA ──────────────────────────────────────── */}}
+        {{ if and $siteKey (ne $siteKey "PLACEHOLDER_TURNSTILE_KEY") }}
+        <div class="form-group turnstile-wrapper">
+          <div class="cf-turnstile"
+               data-sitekey="{{ $siteKey }}"
+               data-theme="light"
+               data-size="normal"
+               data-callback="onPhotoTurnstileSuccess"
+               data-expired-callback="onPhotoTurnstileExpired">
+          </div>
+        </div>
+        {{ else }}
+        <div class="captcha-placeholder">
+          <p>
+            ⚙️ <strong>Turnstile CAPTCHA not yet configured.</strong>
+            Sign up at <a href="https://dash.cloudflare.com" target="_blank" rel="noopener">dash.cloudflare.com</a>
+            → Turnstile → Add site, then paste your site key into <code>hugo.toml</code> →
+            <code>params.turnstileSiteKey</code>.
+          </p>
+        </div>
+        {{ end }}
+
+        <p class="form-success" id="photo-upload-success" hidden>
+          Thank you! Your photos are on their way to us.
+        </p>
+        <p class="form-error" id="photo-upload-error" hidden>
+          Something went wrong uploading your photos — please try again, or email them to us directly.
+        </p>
+
+        <div class="form-group">
+          <button type="submit" class="btn btn--full" id="photo-upload-submit" disabled>Upload Photos</button>
+        </div>
+
+      </form>
+    </div>
+  </div>
+</section>
+
+{{ end }}

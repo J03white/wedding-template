@@ -1,12 +1,12 @@
 # Wedding Website Template
 
-Hugo site deployed on Cloudflare Pages. The couple can update all content (text, photos, event details, FAQ) via a visual admin panel at `/admin` — no GitHub account or technical knowledge required.
+Hugo site deployed as a Cloudflare Worker with assets (Workers Builds, git-connected) — see "Manual deployment steps" below for why this isn't Cloudflare Pages. The couple can update all content (text, photos, event details, FAQ) via a visual admin panel at `/admin` — no GitHub account or technical knowledge required.
 
 ---
 
 ## New client setup
 
-Run `/new-wedding-site` in Claude Code and it will walk through replacing all the placeholders and pushing to GitHub.
+Run `/new-wedding-site` in Claude Code and it will walk through replacing all the placeholders and pushing to GitHub. See `ai-toolkit` for the full automated pipeline covering this plus the manual deployment steps below.
 
 Placeholders used throughout the project:
 
@@ -18,9 +18,12 @@ Placeholders used throughout the project:
 | `PLACEHOLDER_VENUE_NAME` | e.g. "Barnsley House" |
 | `PLACEHOLDER_VENUE_LOCATION` | e.g. "Barnsley, Gloucestershire" |
 | `PLACEHOLDER_RSVP_DATE` | e.g. "1st April 2026" |
-| `PLACEHOLDER_SITE_DOMAIN` | e.g. "alice-ben-wedding.pages.dev" |
+| `PLACEHOLDER_SITE_DOMAIN` | e.g. "alice-and-ben-wedding.com" |
 | `OWNER/REPO` | e.g. "j03white/alice-ben-wedding" |
 | `PLACEHOLDER_TURNSTILE_KEY` | Cloudflare Turnstile site key |
+| `PLACEHOLDER_WORKER_NAME` (`wrangler.toml`) | Short slug for the Worker/project name, e.g. "alice-ben-wedding" |
+
+`wrangler.toml`'s other `PLACEHOLDER_*` values (`CF_TEAM_DOMAIN`, `GOOGLE_SERVICE_ACCOUNT_EMAIL`, `GOOGLE_SHEET_ID`, `SITE_PASSWORD`, `DROPBOX_APP_KEY`, `DROPBOX_FOLDER_PATH`) aren't known yet at this stage — they get filled in during the manual deployment steps below, not this initial pass.
 
 ---
 
@@ -75,15 +78,18 @@ The Couple Photos section reads from `data/gallery.yaml`. To test adding/removin
 
 ## Manual deployment steps
 
-These steps are done once per client after pushing the code to GitHub.
+These steps are done once per client after pushing the code to GitHub. The site deploys as a **Cloudflare Worker with assets** (Workers Builds, git-connected), not Cloudflare Pages — Pages is Cloudflare's legacy platform; Workers is what they now steer all new projects toward, and it's what every real site built from this template deploys as.
 
-### 1 — Cloudflare Pages
+**Variable rules, learned the hard way (see `wedding-website/README.md` for the full story):** non-secret values go in `wrangler.toml`'s `[vars]` block, committed to the repo — `wrangler deploy` (which Workers Builds runs on every push) syncs those from the file every time, so anything set only via the dashboard as a plain "Variable" gets silently wiped on the next deploy. Actual secrets go **only** in the dashboard (Settings → Variables and Secrets, type "Secret") or via `wrangler secret put <NAME>` — never in `wrangler.toml`, never committed.
 
-1. Go to **Cloudflare Pages** → Create a project → Connect to Git
-2. Select the client's repository
-3. Set **build command**: `hugo`
-4. Set **build output directory**: `public`
-5. Deploy — the site will be live at `https://<SITE_DOMAIN>`
+### 1 — Cloudflare Workers Builds
+
+1. Go to **Workers & Pages** → Create → connect the client's GitHub repository
+2. Build command: `hugo`
+3. Deploy command: `npx wrangler deploy`
+4. Deploy — the site will be live at `https://<SITE_DOMAIN>`
+
+There's no API or Terraform resource for this step — confirmed directly against Cloudflare's own docs. It's a one-time dashboard click per new site.
 
 ---
 
@@ -96,27 +102,15 @@ The CMS needs a token to commit content changes to the repo on the couple's beha
 3. Permissions: **Contents: Read and Write** (nothing else)
 4. Set an expiry (1 year recommended)
 5. Copy the token — you only see it once
+6. Set it as a **Secret** on the Worker: `wrangler secret put GITHUB_PAT`
 
 ---
 
-### 3 — Cloudflare Pages environment variables
+### 3 — Cloudflare Access (magic link login)
 
-Go to **Cloudflare Pages → [project] → Settings → Environment Variables** and add these as encrypted variables (Production + Preview):
+This is what lets the couple log into `/admin` using just their email address — no GitHub account needed. **Prefer managing this via `wedding-infra`'s Terraform module** (`modules/wedding-site`) rather than the dashboard — add a `module` block in `sites.tf` with the new site's domain and the couple's emails, `terraform apply` creates the Access application and policy, and its `aud` output is what you need for step 3's `CF_ACCESS_AUD`.
 
-| Variable | Value |
-|---|---|
-| `GITHUB_PAT` | The fine-grained token from step 2 |
-| `CF_TEAM_DOMAIN` | Your Zero Trust team domain, e.g. `yourteam.cloudflareaccess.com` |
-| `CF_ACCESS_AUD` | The AUD tag from the Access application (step 4) |
-
-After adding variables, trigger a redeploy: **Pages → Deployments → Retry deployment**.
-
----
-
-### 4 — Cloudflare Access (magic link login)
-
-This is what lets the couple log into `/admin` using just their email address — no GitHub account needed.
-
+If doing it manually instead:
 1. Go to **Cloudflare Zero Trust → Access → Applications → Add an application**
 2. Type: **Self-hosted**
 3. Application name: e.g. "Alice & Ben Wedding Admin"
@@ -124,36 +118,68 @@ This is what lets the couple log into `/admin` using just their email address �
 5. Authentication method: **One-time PIN** (magic link email)
 6. Policy → rule type: **Emails** → add the couple's email addresses
 7. Save — copy the **AUD tag** shown on the application details page
-8. Paste the AUD tag as `CF_ACCESS_AUD` in the Pages environment variables (step 3)
+
+### 3b — Set the Worker's runtime variables
+
+- `wrangler.toml` `[vars]` (non-secret, commit these): `CF_TEAM_DOMAIN`
+- Dashboard or `wrangler secret put`: `CF_ACCESS_AUD` (the AUD tag from step 3)
+
+---
+
+### 4 — Turnstile
+
+There's already **one shared Turnstile widget** across every client site's domains (see `wedding-infra`'s `turnstile.tf`) rather than one per site — just add the new site's domain to that widget's `domains` list and `terraform apply`. The resulting site key goes in `hugo.toml` → `params.turnstileSiteKey`; the secret key goes in the Worker as `TURNSTILE_SECRET_KEY` (optional — server-side verification is skipped if unset).
 
 ---
 
 ### 5 — Google Sheets RSVP backend
 
-RSVP submissions append to a Google Sheet via a Cloudflare Pages Function (`functions/rsvp.js`), not Formspree.
+RSVP submissions append to a Google Sheet via `functions/rsvp.js`.
 
-**Google Cloud (one-off per account, can be reused across multiple sites):**
-1. Create (or reuse) a Google Cloud project → enable the **Google Sheets API**
-2. **IAM & Admin → Service Accounts → Create Service Account** (e.g. `rsvp-writer`)
-3. Open it → **Keys → Add Key → Create new key → JSON** — download it, never commit it
-4. Note the `client_email` and `private_key` fields from that JSON
+**Google Cloud (one-off per account, can be reused across multiple sites):** the `rsvp-writer` service account already exists, managed in `wedding-infra`'s Terraform (`service-accounts.tf`) — no new service account needed per client.
 
 **Per client:**
 1. Create two Google Sheets (production + dev), each with a tab named `RSVPs`
 2. Header row — match whichever columns this site's RSVP form actually sends:
    `submission_id | submitted_at | guest_name | guest_email | is_primary_guest | attending | dietary | party_size`
    — plus `accommodation | rooms | nights` on the end **only if** this site's RSVP page has `onsiteAccommodation: true`
-3. **Share** each sheet with the service account's `client_email`, set to **Editor**
+3. **Share** each sheet with the service account's `client_email` (`rsvp-writer@wedding-512615.iam.gserviceaccount.com`), set to **Editor**
 4. Grab each sheet's ID from its URL (`.../spreadsheets/d/<ID>/edit`)
-5. In **Cloudflare Pages → [project] → Settings → Environment Variables**:
-   - Production: `GOOGLE_SHEET_ID` = the production sheet's ID
-   - Preview: `GOOGLE_SHEET_ID` = the dev sheet's ID
-   - Both environments: `GOOGLE_SERVICE_ACCOUNT_EMAIL`, `GOOGLE_PRIVATE_KEY` (encrypted), and `TURNSTILE_SECRET_KEY` (optional — server-side Turnstile verification is skipped if unset)
-6. Redeploy so the new env vars take effect
+5. Worker runtime vars:
+   - `wrangler.toml` `[vars]`: `GOOGLE_SHEET_ID` (the production sheet's ID), `GOOGLE_SERVICE_ACCOUNT_EMAIL`
+   - Secret: `GOOGLE_PRIVATE_KEY`
 
 ---
 
-### 6 — Add images
+### 6 — Guest photo uploads
+
+Guests can upload photos at `/photos` via `functions/photo-upload.js`. The storage backend is pluggable — pick ONE per site with the `PHOTO_STORAGE_PROVIDER` environment variable, set to either `dropbox` or `google-drive`. The request handler doesn't know which one is active; it just calls whichever adapter is configured, so switching providers later is a config change, not a code change.
+
+**Option A — Dropbox (works for any couple, default choice):**
+
+The shared app (App Folder access, `files.content.write` only) already exists — no new Dropbox app needed per client unless the couple wants their own separate Dropbox account (see `wedding-infra`'s notes on this).
+
+Per client:
+1. Inside the app's sandboxed folder, create a subfolder for the couple, e.g. `/alice-and-ben`
+2. Manually share that subfolder with the couple's email (Dropbox UI → Share) so they can see what guests upload — this is a plain Dropbox share, outside the app's own API access
+3. Worker runtime vars:
+   - `wrangler.toml` `[vars]`: `PHOTO_STORAGE_PROVIDER` = `dropbox`, `DROPBOX_APP_KEY`, `DROPBOX_FOLDER_PATH` (e.g. `/alice-and-ben`)
+   - Secrets: `DROPBOX_APP_SECRET`, `DROPBOX_REFRESH_TOKEN`
+
+**Option B — Google Drive (Workspace accounts only):**
+
+Only viable if the couple has paid Google Workspace — service accounts have zero personal Drive storage quota, so this requires a **Shared Drive**, which doesn't exist on free/personal Gmail no matter how a folder is shared. The dedicated `photo-uploader` service account (Terraform-managed, scope `drive.file` only — confirmed via direct API test that it can create files but never read them back) already exists; reuse it rather than creating a new one.
+
+Per client:
+1. Create a Shared Drive in the couple's Workspace, add `photo-uploader@wedding-512615.iam.gserviceaccount.com` as a member
+2. Create a destination folder inside that Shared Drive, grab its folder ID from the URL
+3. Worker runtime vars:
+   - `wrangler.toml` `[vars]`: `PHOTO_STORAGE_PROVIDER` = `google-drive`, `GOOGLE_DRIVE_SERVICE_ACCOUNT_EMAIL`, `GOOGLE_SHARED_DRIVE_ID`, `GOOGLE_DRIVE_FOLDER_ID`
+   - Secret: `GOOGLE_DRIVE_PRIVATE_KEY`
+
+---
+
+### 7 — Add images
 
 Commit the following images to the repository:
 
@@ -167,7 +193,7 @@ Any photos added to `assets/images/couple/` will appear in the homepage photo ca
 
 ---
 
-### 7 — Final check
+### 8 — Final check
 
 1. Visit `https://<SITE_DOMAIN>/admin`
 2. Cloudflare Access prompts for email → enter one of the authorised addresses

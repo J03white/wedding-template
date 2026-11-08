@@ -31,3 +31,8 @@ title = 'PLACEHOLDER_COUPLE_NAMES'
   name   = "RSVP"
   url    = "/rsvp/"
   weight = 5
+
+[[menus.main]]
+  name   = "Photos"
+  url    = "/photos/"
+  weight = 6
